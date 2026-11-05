@@ -1,0 +1,22 @@
+name: Harness delivery acceptance
+on:
+  pull_request:
+    branches: ['codex/harness-acceptance-20261105-01a1']
+    paths: ['harness-acceptance/**', '.github/workflows/harness-delivery-acceptance.yml']
+permissions:
+  contents: read
+jobs:
+  delivery-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate acceptance marker
+        shell: bash
+        run: |
+          actual="$(cat harness-acceptance/verdict.txt 2>/dev/null || true)"
+          if [ "$actual" != "PASS" ]; then
+            echo "::error file=harness-acceptance/verdict.txt,line=1::Harness acceptance marker must be PASS (observed: $actual)"
+            exit 1
+          fi
+          echo "Harness delivery contract passed"
